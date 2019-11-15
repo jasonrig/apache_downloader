@@ -85,4 +85,4 @@ def download_and_verify(path, destination=None):
             with open(download_path, "wb") as f:
                 save_to_file(f)
             assert os.path.exists(download_path), "File could not be downloaded."
-    print("Done.", file=sys.stderr)
+    print(" Done.", file=sys.stderr)
