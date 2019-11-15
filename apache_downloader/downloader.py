@@ -86,3 +86,4 @@ def download_and_verify(path, destination=None):
                 save_to_file(f)
             assert os.path.exists(download_path), "File could not be downloaded."
     print(" Done.", file=sys.stderr)
+    print("\x1B[?25h")  # In case the cursor goes missing
