@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+import argparse
+
+from apache_downloader.downloader import download_and_verify
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Downloads an Apache project and verifies its hash")
+    parser.add_argument("project_path", type=str, help="Path to the Apache project download")
+    parser.add_argument("--destination", type=str, help="Destination of the downloaded file", default=".")
+    args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO)
+    download_and_verify(args.project_path, args.destination)
