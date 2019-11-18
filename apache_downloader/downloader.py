@@ -35,7 +35,8 @@ def get_hash(path):
     url = urlunparse(("https", "www.apache.org", "/dist/%s.sha512" % path.lstrip("/"), "", "", ""))
     req = requests.get(url)
     req.raise_for_status()
-    dl_hash = ("".join(req.text.split()).lower().strip()).encode()
+    dl_hash = "".join(req.text.split()).lower().strip()  # sometimes the hash is multi-line and chunked
+    dl_hash = dl_hash.split(":")[-1]  # sometimes the hash begins with the file name + ":"
     logging.debug("Expected hash is {hash}".format(hash=dl_hash))
     return dl_hash
 
@@ -79,8 +80,8 @@ def download_and_verify(path, destination=None):
                     _f.write(chunk)
                     m.update(chunk)
                     progress_bar.next()
-            actual_hash = m.hexdigest().encode()
-            assert actual_hash == expected_hash,\
+            actual_hash = m.hexdigest()
+            assert actual_hash in expected_hash,\
                 "Hash of downloaded file is invalid, expected {expected_hash} but got {actual_hash}.".format(
                     expected_hash=expected_hash,
                     actual_hash=actual_hash
