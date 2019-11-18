@@ -35,9 +35,9 @@ def get_hash(path):
     url = urlunparse(("https", "www.apache.org", "/dist/%s.sha512" % path.lstrip("/"), "", "", ""))
     req = requests.get(url)
     req.raise_for_status()
-    hash = req.text.strip()
-    logging.debug("Expected hash is {hash}".format(hash=hash))
-    return hash
+    dl_hash = "".join(req.text.strip().split()).lower()
+    logging.debug("Expected hash is {hash}".format(hash=dl_hash))
+    return dl_hash
 
 
 def download_and_verify(path, destination=None):
