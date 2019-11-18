@@ -8,7 +8,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Downloads an Apache project and verifies its hash")
     parser.add_argument("project_path", type=str, help="Path to the Apache project download")
     parser.add_argument("--destination", type=str, help="Destination of the downloaded file", default=".")
-    parser.add_argument("--debug", type=bool, help="Show additional debug log information", default=False, action="store_true")
+    parser.add_argument("--debug", help="Show additional debug log information", default=False, action="store_true")
     args = parser.parse_args()
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
     try:
