@@ -33,7 +33,9 @@ def get_hash(path):
     :return: the sha512 hash
     """
     url = urlunparse(("https", "www.apache.org", "/dist/%s.sha512" % path.lstrip("/"), "", "", ""))
-    hash = requests.get(url).text.strip()
+    req = requests.get(url)
+    req.raise_for_status()
+    hash = req.text.strip()
     logging.debug("Expected hash is {hash}".format(hash=hash))
     return hash
 
@@ -77,7 +79,12 @@ def download_and_verify(path, destination=None):
                     _f.write(chunk)
                     m.update(chunk)
                     progress_bar.next()
-            assert m.hexdigest() == expected_hash, "Hash of downloaded file is invalid"
+            actual_hash = m.hexdigest()
+            assert actual_hash == expected_hash,\
+                "Hash of downloaded file is invalid, expected {expected_hash} but got {actual_hash}.".format(
+                    expected_hash=expected_hash,
+                    actual_hash=actual_hash
+                )
 
         if hasattr(download_path, "write"):
             save_to_file(download_path)
