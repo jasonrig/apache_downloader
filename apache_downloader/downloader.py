@@ -25,7 +25,7 @@ def get_mirror_url(site, path):
             "action": "download",
             "filename": path
         }), "")),
-        'archive': urlunparse(("https", site + ".apache.org", "/dist/%s" % path.lstrip("/"), "", "", ""))
+        'archive': urlunparse(("https", "archive.apache.org", "/dist/%s" % path.lstrip("/"), "", "", ""))
     }[site]
 
 
