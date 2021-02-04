@@ -14,25 +14,29 @@ from progress.spinner import Spinner
 DOWNLOAD_CHUNK_SIZE = 8192
 
 
-def get_mirror_url(path):
+def get_mirror_url(site, path):
     """
     Formats the download URL for the Apache project file path
     :param path: the download file path, e.g. /nifi/nifi-registry/nifi-registry-0.5.0/nifi-registry-0.5.0-bin.tar.gz
     :return: the direct download URL
     """
-    return urlunparse(("https", "www.apache.org", "/dyn/mirrors/mirrors.cgi", "", urlencode({
-        "action": "download",
-        "filename": path
-    }), ""))
+    return {
+        'www': urlunparse(("https", "www.apache.org", "/dyn/mirrors/mirrors.cgi", "", urlencode({
+            "action": "download",
+            "filename": path
+        }), "")),
+        'archive': urlunparse(("https", "archive.apache.org", "/dist/%s" % path.lstrip("/"), "", "", ""))
+    }[site]
 
 
-def get_hash(path):
+def get_hash(site, path):
     """
     Get the hash value from the official apache.org website
     :param path: the download file path, e.g. /nifi/nifi-registry/nifi-registry-0.5.0/nifi-registry-0.5.0-bin.tar.gz
     :return: the sha512 hash
     """
-    url = urlunparse(("https", "www.apache.org", "/dist/%s.sha512" % path.lstrip("/"), "", "", ""))
+    url = urlunparse(("https", site + ".apache.org", "/dist/%s.sha512" % path.lstrip("/"), "", "", ""))
+    logging.debug("fetch url {url}".format(url=url))
     req = requests.get(url)
     req.raise_for_status()
     dl_hash = "".join(req.text.split()).lower().strip()  # sometimes the hash is multi-line and chunked
@@ -61,9 +65,16 @@ def download_and_verify(path, destination=None):
         download_path = destination
         logging.info("Downloading Apache project {path}".format(path=path))
 
-    expected_hash = get_hash(path)
+    site = "www"
+    try:
+        expected_hash = get_hash(site, path)
+    except requests.exceptions.HTTPError as err:
+        logging.debug("Not found, try from archive")
+        site = "archive"
+        expected_hash = get_hash(site, path)
+        logging.info("Downloading from archive")
 
-    with requests.get(get_mirror_url(path), stream=True) as r:
+    with requests.get(get_mirror_url(site, path), stream=True) as r:
         r.raise_for_status()
         file_length = r.headers.get("content-length")
         if file_length:
