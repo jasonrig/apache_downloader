@@ -72,6 +72,7 @@ def download_and_verify(path, destination=None):
         logging.debug("Not found, try from archive")
         site = "archive"
         expected_hash = get_hash(site, path)
+        logging.info("Downloading from archive")
 
     with requests.get(get_mirror_url(site, path), stream=True) as r:
         r.raise_for_status()
