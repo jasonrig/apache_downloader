@@ -14,10 +14,11 @@ from progress.spinner import Spinner
 DOWNLOAD_CHUNK_SIZE = 8192
 
 
-def get_mirror_url(site, path):
+def get_mirror_url(path, site="www"):
     """
     Formats the download URL for the Apache project file path
     :param path: the download file path, e.g. /nifi/nifi-registry/nifi-registry-0.5.0/nifi-registry-0.5.0-bin.tar.gz
+    :param site: "www" if the main site is used, "archive" if the archive site is used
     :return: the direct download URL
     """
     return {
@@ -29,10 +30,11 @@ def get_mirror_url(site, path):
     }[site]
 
 
-def get_hash(site, path):
+def get_hash(path, site="www"):
     """
     Get the hash value from the official apache.org website
     :param path: the download file path, e.g. /nifi/nifi-registry/nifi-registry-0.5.0/nifi-registry-0.5.0-bin.tar.gz
+    :param site: "www" if the main site is used, "archive" if the archive site is used
     :return: the sha512 hash
     """
     url = urlunparse(("https", site + ".apache.org", "/dist/%s.sha512" % path.lstrip("/"), "", "", ""))
@@ -67,14 +69,14 @@ def download_and_verify(path, destination=None):
 
     site = "www"
     try:
-        expected_hash = get_hash(site, path)
-    except requests.exceptions.HTTPError as err:
+        expected_hash = get_hash(path, site)
+    except requests.exceptions.HTTPError:
         logging.debug("Not found, try from archive")
         site = "archive"
-        expected_hash = get_hash(site, path)
+        expected_hash = get_hash(path, site)
         logging.info("Downloading from archive")
 
-    with requests.get(get_mirror_url(site, path), stream=True) as r:
+    with requests.get(get_mirror_url(path, site), stream=True) as r:
         r.raise_for_status()
         file_length = r.headers.get("content-length")
         if file_length:
