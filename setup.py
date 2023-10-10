@@ -11,7 +11,7 @@ setup(
     author_email='hello@jasonrig.by',
     description='Downloads and verifies an Apache project',
     install_requires=[
-        'requests>=2.22,<2.23',
+        'requests>=2.31,<2.32',
         'progress>=1.5,<1.6',
         'humanize>=0.5,<0.6'
     ]
