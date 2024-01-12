@@ -43,6 +43,12 @@ def get_hash(path, site="www"):
     req.raise_for_status()
     dl_hash = "".join(req.text.split()).lower().strip()  # sometimes the hash is multi-line and chunked
     dl_hash = dl_hash.split(":")[-1]  # sometimes the hash begins with the file name + ":"
+
+    if "<html>" in (dl_hash) or "</html>" in (dl_hash):     
+        # Throw exception for html page.
+        requests.get("http://httpbin.org/status/404")\
+            .raise_for_status()
+    
     logging.debug("Expected hash is {hash}".format(hash=dl_hash))
     return dl_hash
 
