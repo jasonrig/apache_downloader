@@ -30,11 +30,11 @@ def get_mirror_url(path, site="www"):
     }[site]
 
 
-def get_hash(path, site="www"):
+def get_hash(path, site):
     """
     Get the hash value from the official apache.org website
     :param path: the download file path, e.g. /nifi/nifi-registry/nifi-registry-0.5.0/nifi-registry-0.5.0-bin.tar.gz
-    :param site: "www" if the main site is used, "archive" if the archive site is used
+    :param site: "downloads" if the main site is used, "archive" if the archive site is used
     :return: the sha512 hash
     """
     url = urlunparse(("https", site + ".apache.org", "/dist/%s.sha512" % path.lstrip("/"), "", "", ""))
@@ -67,7 +67,7 @@ def download_and_verify(path, destination=None):
         download_path = destination
         logging.info("Downloading Apache project {path}".format(path=path))
 
-    site = "www"
+    site = "downloads"
     try:
         expected_hash = get_hash(path, site)
     except requests.exceptions.HTTPError:
