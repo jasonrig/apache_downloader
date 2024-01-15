@@ -14,18 +14,15 @@ from progress.spinner import Spinner
 DOWNLOAD_CHUNK_SIZE = 8192
 
 
-def get_mirror_url(path, site="www"):
+def get_mirror_url(path, site):
     """
     Formats the download URL for the Apache project file path
     :param path: the download file path, e.g. /nifi/nifi-registry/nifi-registry-0.5.0/nifi-registry-0.5.0-bin.tar.gz
-    :param site: "www" if the main site is used, "archive" if the archive site is used
+    :param site: "downloads" if the main site is used, "archive" if the archive site is used
     :return: the direct download URL
     """
     return {
-        'www': urlunparse(("https", "www.apache.org", "/dyn/mirrors/mirrors.cgi", "", urlencode({
-            "action": "download",
-            "filename": path
-        }), "")),
+        'downloads': urlunparse(("https", "downloads.apache.org", "/%s" % path.lstrip("/"), "", "", "")),
         'archive': urlunparse(("https", "archive.apache.org", "/dist/%s" % path.lstrip("/"), "", "", ""))
     }[site]
 
@@ -37,7 +34,8 @@ def get_hash(path, site):
     :param site: "downloads" if the main site is used, "archive" if the archive site is used
     :return: the sha512 hash
     """
-    url = urlunparse(("https", site + ".apache.org", "/dist/%s.sha512" % path.lstrip("/"), "", "", ""))
+    url = urlunparse(("https", site + ".apache.org", "/%s.sha512" % path.lstrip("/"), "", "", ""))
+    print(url)
     logging.debug("fetch url {url}".format(url=url))
     req = requests.get(url)
     req.raise_for_status()
