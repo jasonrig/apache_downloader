@@ -4,7 +4,7 @@ import os
 import sys
 from math import ceil
 from os.path import basename, dirname, isdir, expanduser
-from urllib.parse import urlunparse, urlencode
+from urllib.parse import urlunparse
 
 import humanize
 import requests
@@ -14,7 +14,7 @@ from progress.spinner import Spinner
 DOWNLOAD_CHUNK_SIZE = 8192
 
 
-def get_mirror_url(path, site):
+def get_download_url(path, site):
     """
     Formats the download URL for the Apache project file path
     :param path: the download file path, e.g. /nifi/nifi-registry/nifi-registry-0.5.0/nifi-registry-0.5.0-bin.tar.gz
@@ -34,8 +34,7 @@ def get_hash(path, site):
     :param site: "downloads" if the main site is used, "archive" if the archive site is used
     :return: the sha512 hash
     """
-    url = urlunparse(("https", site + ".apache.org", "/%s.sha512" % path.lstrip("/"), "", "", ""))
-    print(url)
+    url = get_download_url(path + ".sha512", site)
     logging.debug("fetch url {url}".format(url=url))
     req = requests.get(url)
     req.raise_for_status()
@@ -65,16 +64,16 @@ def download_and_verify(path, destination=None):
         download_path = destination
         logging.info("Downloading Apache project {path}".format(path=path))
 
-    site = "downloads"
+    site = "archive"
     try:
         expected_hash = get_hash(path, site)
-    except requests.exceptions.HTTPError:
-        logging.debug("Not found, try from archive")
-        site = "archive"
-        expected_hash = get_hash(path, site)
         logging.info("Downloading from archive")
+    except requests.exceptions.HTTPError:
+        logging.debug("Not found in archive, trying from downloads")
+        site = "downloads"
+        expected_hash = get_hash(path, site)
 
-    with requests.get(get_mirror_url(path, site), stream=True) as r:
+    with requests.get(get_download_url(path, site), stream=True) as r:
         r.raise_for_status()
         file_length = r.headers.get("content-length")
         if file_length:

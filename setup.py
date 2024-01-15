@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='apache-downloader',
-    version='0.1.3',
+    version='0.1.4',
     packages=['apache_downloader'],
     scripts=['bin/apache-dl'],
     url='',
